@@ -1,0 +1,252 @@
+{
+  "openapi": "1.0",
+  "title": "Thordata Web Scraper API",
+  "description": "Thordata Web Scraper API 文檔 — AI 友好格式",
+  "baseUrl": "https://openapi.thordata.com/api",
+  "auth": {
+    "type": "header",
+    "field": "token",
+    "source": "儀表板 → 菜單 → 我的賬戶"
+  },
+  "endpoints": [
+    {
+      "name": "創建任務",
+      "path": "/web-scraper-api/tasks-create",
+      "fullUrl": "https://scraperapi.thordata.com/builder",
+      "method": "POST",
+      "description": "創建 Web Scraper API 抓取任務",
+      "videoBuilderUrl": "https://scraperapi.thordata.com/video_builder",
+      "headers": [
+        {
+          "name": "token",
+          "type": "string",
+          "required": true,
+          "description": "儀表板 → 菜單 → 我的賬戶 查看"
+        },
+        {
+          "name": "Authorization",
+          "type": "string",
+          "required": true,
+          "description": "Bearer token，儀表板 → Web Scraper → API 查看"
+        }
+      ],
+      "body": [
+        {
+          "name": "spider_name",
+          "type": "string",
+          "required": true,
+          "description": "目標網站：facebook.com / amazon.com / youtube.com"
+        },
+        {
+          "name": "spider_id",
+          "type": "string",
+          "required": true,
+          "description": "爬蟲 ID，如 amazon_product_by-url, youtube_video_by-url 等"
+        },
+        {
+          "name": "spider_parameters",
+          "type": "text",
+          "required": true,
+          "description": "爬蟲參數（JSON 字符串），含 url、zip_code、sort_by 等，具體視 spider_id 而定"
+        },
+        {
+          "name": "spider_errors",
+          "type": "string",
+          "required": true,
+          "description": "固定值：true"
+        },
+        {
+          "name": "file_name",
+          "type": "string",
+          "required": true,
+          "description": "下載文件名稱，支持變量：{{TasksID}}、{{VideoID}}"
+        }
+      ],
+      "response": {
+        "code": { "type": "number", "description": "狀態碼" },
+        "data": {
+          "type": "object",
+          "fields": {
+            "task_id": { "type": "string", "description": "任務 ID" }
+          }
+        }
+      },
+      "exampleResponse": {
+        "code": 200,
+        "data": { "task_id": "68a21d2e8f2645e39f3d62231ef6d829" }
+      }
+    },
+    {
+      "name": "任務運行狀態",
+      "path": "/web-scraper-api/tasks-status",
+      "method": "POST",
+      "description": "獲取單個或多個任務的運行狀態",
+      "headers": [
+        {
+          "name": "token",
+          "type": "string",
+          "required": true,
+          "description": "儀表板 → 菜單 → 我的賬戶 查看"
+        }
+      ],
+      "body": [
+        {
+          "name": "tasks_ids",
+          "type": "string",
+          "required": true,
+          "description": "任務 ID，多個用逗號分隔，如：123ffed4917a41389f7e21c6b8be6a95,c59d9325e9fe4e149c6a59cbd6e3a954"
+        }
+      ],
+      "response": {
+        "code": { "type": "number" },
+        "msg": { "type": "string" },
+        "data": {
+          "type": "array",
+          "items": {
+            "task_id": { "type": "string" },
+            "status": { "type": "string", "enum": ["Running", "Failed", "Ready"] }
+          }
+        }
+      },
+      "exampleResponse": {
+        "code": 200,
+        "data": [
+          { "task_id": "449ffed4917a41389f7e21c6b8be6a95", "status": "Running" },
+          { "task_id": "c59d9325e9fe4e149c6a59cbd6e3a5e4", "status": "Ready" }
+        ],
+        "msg": "ok"
+      }
+    },
+    {
+      "name": "任務列表獲取",
+      "path": "/web-scraper-api/tasks-list",
+      "method": "POST",
+      "description": "獲取任務列表數據",
+      "headers": [
+        {
+          "name": "token",
+          "type": "string",
+          "required": true,
+          "description": "儀表板 → 菜單 → 我的賬戶 查看"
+        }
+      ],
+      "body": [
+        { "name": "page", "type": "text", "required": false, "description": "分頁頁碼" },
+        { "name": "size", "type": "text", "required": false, "description": "每頁數量" }
+      ],
+      "response": {
+        "code": { "type": "number" },
+        "msg": { "type": "string" },
+        "data": {
+          "type": "object",
+          "fields": {
+            "count": { "type": "number", "description": "任務總數" },
+            "list": {
+              "type": "array",
+              "items": {
+                "task_id": { "type": "string", "description": "任務 ID" },
+                "created_time": { "type": "number", "description": "創建時間（Unix 時間戳，秒）" },
+                "end_time": { "type": "number", "description": "結束時間（Unix 時間戳，秒；0 = 進行中）" },
+                "prodect_id": { "type": "number", "description": "產品 ID" },
+                "url": { "type": "string", "description": "任務 URL 參數（JSON 字符串）" },
+                "api_url": { "type": "string", "description": "API 回調地址" },
+                "api_code": { "type": "number", "description": "回調 API 響應狀態碼" },
+                "api_result": { "type": "string", "description": "回調 API 返回結果" },
+                "api_error_msg": { "type": "string", "description": "回調 API 錯誤訊息" },
+                "api_response_time": { "type": "number", "description": "回調 API 響應時間（毫秒）" },
+                "success_rate": { "type": "number", "description": "成功率（0~1）" },
+                "file_size": { "type": "number", "description": "檔案大小（位元組）" },
+                "error_number": { "type": "number", "description": "錯誤次數" },
+                "type": { "type": "number", "description": "任務類型" },
+                "api_key": { "type": "string", "description": "API Key" }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "獲取抓取結果文件",
+      "path": "/web-scraper-api/tasks-download",
+      "method": "POST",
+      "description": "獲取任務抓取結果文件（JSON / CSV / 視頻 / 字幕 / 音頻）",
+      "headers": [
+        {
+          "name": "token",
+          "type": "string",
+          "required": true,
+          "description": "儀表板 → 菜單 → 我的賬戶 查看"
+        }
+      ],
+      "body": [
+        { "name": "tasks_id", "type": "string", "required": true, "description": "任務 ID" },
+        {
+          "name": "type",
+          "type": "text",
+          "required": true,
+          "description": "文件類型",
+          "enum": ["json", "csv", "video", "subtitle", "audio"]
+        }
+      ],
+      "response": {
+        "code": { "type": "number" },
+        "msg": { "type": "string" },
+        "data": {
+          "type": "object",
+          "fields": {
+            "download": { "type": "string", "description": "下載地址（任務未完成時為空字符串）" },
+            "tasks_ids": { "type": "string", "description": "任務 ID" }
+          }
+        }
+      },
+      "exampleResponse": {
+        "code": 200,
+        "data": {
+          "download": "https://www.thordata.com/scrapers/thordata/2025/06/03/449ffed4917a41389f7e21c6b8be6a95.json",
+          "tasks_ids": "449ffed4917a41389f7e21c6b8be6a95"
+        },
+        "msg": "ok"
+      }
+    },
+    {
+      "name": "獲取最後一個任務狀態",
+      "path": "/web_scraper_api/get_latest_task_status",
+      "method": "POST",
+      "description": "取得指定帳號最後一個任務的狀態",
+      "headers": [
+        {
+          "name": "token",
+          "type": "string",
+          "required": true,
+          "description": "儀表板 → 菜單 → 我的賬戶 查看"
+        }
+      ],
+      "response": {
+        "code": { "type": "number", "description": "200 = 成功" },
+        "msg": { "type": "string" },
+        "data": {
+          "type": "object",
+          "fields": {
+            "api_code": { "type": "number", "description": "任務 API 響應碼，200 = 成功，400 = 失敗" },
+            "api_error_msg": { "type": "string", "description": "錯誤訊息" }
+          }
+        }
+      },
+      "exampleResponse": {
+        "code": 200,
+        "data": { "api_code": 200, "api_error_msg": "" },
+        "msg": "ok"
+      }
+    }
+  ],
+  "workflow": {
+    "description": "建議調用流程",
+    "steps": [
+      { "step": 1, "action": "創建任務", "api": "tasks-create", "output": "task_id" },
+      { "step": 2, "action": "輪詢任務狀態", "api": "tasks-status?tasks_ids={task_id}", "pollUntil": "status=Ready" },
+      { "step": 3, "action": "獲取結果文件", "api": "tasks-download?tasks_id={task_id}&type=json" },
+      { "step": 4, "action": "（可選）查看任務列表", "api": "tasks-list" }
+    ]
+  },
+  "errorReference": "https://doc.thordata.com/interface-documentation/zh-hk/cuo-wu-ma/cuo-wu-ma-shuo-ming"
+}
