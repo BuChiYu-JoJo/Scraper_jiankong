@@ -24,10 +24,10 @@ def _parse_spider_parameters(raw: str) -> dict:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Scraper monitor CLI")
-    parser.add_argument("spider_name", help="Spider name")
-    parser.add_argument("spider_id", help="Spider id")
-    parser.add_argument("spider_parameters", nargs="?", default="{}", help="Spider parameters JSON")
-    parser.add_argument("file_name", nargs="?", default="", help="Output file name")
+    parser.add_argument("--spider-name", required=True, help="Spider name")
+    parser.add_argument("--spider-id", required=True, help="Spider id")
+    parser.add_argument("--spider-parameters", default="{}", help="Spider parameters JSON")
+    parser.add_argument("--file-name", default="", help="Output file name")
     return parser
 
 
@@ -44,8 +44,9 @@ def main() -> None:
     settings = load_settings()
     result = run_monitor(context, settings)
     print(
-        f"spider_id={result.spider_id} status={result.status} "
-        f"success_rate={result.success_rate:.2%} updated_at={result.updated_at.isoformat()}"
+        f"spider_id={result.spider_id} task_id={result.task_id} status={result.status} "
+        f"raw_status={result.raw_status} success_rate={result.success_rate:.2%} "
+        f"download_url={result.download_url} updated_at={result.updated_at.isoformat()}"
     )
 
 
