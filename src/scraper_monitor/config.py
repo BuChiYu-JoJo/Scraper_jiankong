@@ -52,21 +52,33 @@ def _validate_threshold(name: str, value: float) -> None:
         raise ValueError(f"{name} must be between 0 and 1, got {value}")
 
 
+def _validate_positive(name: str, value: int) -> None:
+    if value <= 0:
+        raise ValueError(f"{name} must be positive, got {value}")
+
+
 def load_settings() -> Settings:
     """Load and validate settings from environment variables."""
 
     success_rate_threshold = _get_float_env("SUCCESS_RATE_THRESHOLD", 0.95)
     severe_rate_threshold = _get_float_env("SEVERE_RATE_THRESHOLD", 0.8)
 
+    poll_interval = _get_int_env("POLL_INTERVAL", 10)
+    max_running_time = _get_int_env("MAX_RUNNING_TIME", 1800)
+
     _validate_threshold("SUCCESS_RATE_THRESHOLD", success_rate_threshold)
     _validate_threshold("SEVERE_RATE_THRESHOLD", severe_rate_threshold)
+    if severe_rate_threshold > success_rate_threshold:
+        raise ValueError("SEVERE_RATE_THRESHOLD must be less than or equal to SUCCESS_RATE_THRESHOLD")
+    _validate_positive("POLL_INTERVAL", poll_interval)
+    _validate_positive("MAX_RUNNING_TIME", max_running_time)
 
     return Settings(
         thordata_token=_get_required_env("THORDATA_TOKEN"),
         thordata_authorization=_get_required_env("THORDATA_AUTHORIZATION"),
         thordata_base_url=os.getenv("THORDATA_BASE_URL", "https://openapi.thordata.com/api"),
-        poll_interval=_get_int_env("POLL_INTERVAL", 10),
-        max_running_time=_get_int_env("MAX_RUNNING_TIME", 1800),
+        poll_interval=poll_interval,
+        max_running_time=max_running_time,
         success_rate_threshold=success_rate_threshold,
         severe_rate_threshold=severe_rate_threshold,
         dingtalk_webhook=os.getenv("DINGTALK_WEBHOOK", "").strip(),

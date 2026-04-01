@@ -18,6 +18,13 @@ class SpiderContext:
 @dataclass
 class MonitorResult:
     spider_id: str
+    task_id: str
     status: str
     success_rate: float
+    raw_status: str
     updated_at: datetime
+    error_number: int = 0
+    api_code: int = 0
+    api_error_msg: str = ""
+    file_size: int = 0
+    download_url: str = ""
